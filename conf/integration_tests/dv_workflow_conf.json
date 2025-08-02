@@ -1,0 +1,128 @@
+{
+  "name": "{{ dv_workflow_name }}",
+  "email_notifications": {
+    "no_alert_for_skipped_runs": false
+  },
+  "max_concurrent_runs": 1,
+  "format": "MULTI_TASK",
+  "queue": {
+      "enabled": true
+  },
+  "tags": {
+      "workflow_project": "DATTA-TECH-EH-DV-D-WF"
+    },
+  "tasks": [
+    {
+      "task_key": "setup",
+      "notebook_task": {
+        "notebook_path": "{{ repos_path }}/integration_tests/scripts/dv_setup",
+        "base_parameters": {
+          "unique_repo_branch_id": "{{ unique_repo_branch_id }}",
+          "unique_repo_branch_id_schema": "{{ unique_repo_branch_id }}",
+          "repos_path": "{{ repos_path }}",
+          "env": "{{ env }}"
+        },
+        "source": "WORKSPACE"
+      },
+      "job_cluster_key": "sede-x-DATTA-TECH-EH-data_validation-workflow_job_cluster",
+      "timeout_seconds": 0,
+      "email_notifications": {}
+    },
+    {
+      "task_key": "process_start_workflow",
+      "depends_on": [
+        {
+          "task_key": "setup"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "{{ repos_path }}/datta_tech_eh/process_start_workflow",
+        "base_parameters": {
+          "env": "{{ env }}",
+          "repos_path": "{{ repos_path }}",
+          "workflow_frequency":"DV",
+          "unique_repo_branch_id": "{{ unique_repo_branch_id }}",
+          "unique_repo_branch_id_schema": "{{ unique_repo_branch_id }}"
+        },
+        "source": "WORKSPACE"
+      },
+      "job_cluster_key": "sede-x-DATTA-TECH-EH-data_validation-workflow_job_cluster",
+      "timeout_seconds": 0,
+      "email_notifications": {}
+    },   
+    {
+      "task_key": "data_validation_logic",
+      "depends_on": [
+        {
+          "task_key": "process_start_workflow"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "{{ repos_path }}/datta_pipeline_library/transformation/euh_eh/dataValidation_logic",
+        "base_parameters": {
+          "env": "{{ env }}",
+          "repos_path": "{{ repos_path }}",
+          "unique_repo_branch_id": "{{ unique_repo_branch_id }}",
+          "unique_repo_branch_id_schema": "{{ unique_repo_branch_id }}"
+        },
+        "source": "WORKSPACE"
+      },
+      "job_cluster_key": "sede-x-DATTA-TECH-EH-data_validation-workflow_job_cluster",
+      "timeout_seconds": 0,
+      "email_notifications": {}
+    }, 
+    {
+      "task_key": "process_end_workflow",
+      "depends_on": [
+        {
+          "task_key": "data_validation_logic"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "{{ repos_path }}/datta_tech_eh/process_end_workflow",
+        "base_parameters": {
+          "env": "{{ env }}",
+          "repos_path": "{{ repos_path }}",
+          "workflow_frequency":"DV",
+          "unique_repo_branch_id": "{{ unique_repo_branch_id }}",
+          "unique_repo_branch_id_schema": "{{ unique_repo_branch_id }}"
+        },
+        "source": "WORKSPACE"
+      },
+      "job_cluster_key": "sede-x-DATTA-TECH-EH-data_validation-workflow_job_cluster",
+      "timeout_seconds": 0,
+      "email_notifications": {}
+    }
+  ],
+  "job_clusters": [
+    {
+      "job_cluster_key": "sede-x-DATTA-TECH-EH-data_validation-workflow_job_cluster",
+      "new_cluster": {
+        "cluster_name": "",
+        "spark_version": "15.4.x-scala2.12",
+        "spark_conf": {
+          "spark.databricks.delta.preview.enabled": "true",
+          "spark.master": "local[*, 4]",
+          "spark.databricks.cluster.profile": "singleNode"
+        },
+        "azure_attributes": {
+          "first_on_demand": 1,
+          "availability": "ON_DEMAND_AZURE",
+          "spot_bid_max_price": -1
+        },
+        "node_type_id": "Standard_DS3_v2",
+        "custom_tags": {
+          "ResourceClass": "SingleNode"
+        },
+        "spark_env_vars": {
+          "PYSPARK_PYTHON": "/databricks/python3/bin/python3"
+        },
+        "enable_elastic_disk": true,
+        "data_security_mode": "SINGLE_USER",
+        "runtime_engine": "STANDARD",
+        "num_workers": 0
+      }
+    }
+  ],
+  "timeout_seconds": 0
+}

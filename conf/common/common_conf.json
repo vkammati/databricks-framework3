@@ -1,0 +1,16 @@
+{
+    "catalog_prefix": "cross_ds",
+    "project_name": "adf",
+    "aecorsoft_project_name": "aecorsoft",    
+    "app_name": "ds",
+    "data_topology_group": "DS-CrossDS",
+    "business_domain": "CROSS_DS",
+    "process_config_project_name":"DATTA",
+    "process_order":"2",
+    "process_name":"DLT_WORKFLOW",
+    "workflow_name":"sede-x-DATTA-TECH-EH-workflow",
+    "dv_workflow_name":"sede-x-DATTA-TECH-EH-DV-workflow",
+    "uom_workflow_name":"sede-x-DATTA-TECH-EH-UOM-workflow",
+    "uom_demo_workflow_name":"sede-x-DATTA-TECH-EH-UOM-DEMO-workflow"
+    
+}
